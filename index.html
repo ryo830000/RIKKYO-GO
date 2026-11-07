@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3b6cf6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="スクールライフ">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>スクールライフ</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--ink:#1d2433;--sub:#6b7488;--line:#e3e6ee;--pri:#3b6cf6;--pri2:#e8eefe;--ok:#1a9d6b;--warn:#e8590c;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);padding-bottom:calc(72px + env(safe-area-inset-bottom));padding-top:env(safe-area-inset-top)}
+header{padding:16px 16px 8px}
+header h1{margin:0;font-size:20px}
+header .date{color:var(--sub);font-size:13px;margin-top:2px}
+main{padding:0 12px}
+.tab{display:none}.tab.on{display:block}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;padding:10px 0 8px;font-size:12px;color:var(--sub);font-family:inherit}
+nav button .ic{display:block;font-size:22px;line-height:1.1}
+nav button.on{color:var(--pri);font-weight:700}
+.card{background:var(--card);border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 3px rgba(20,30,60,.06)}
+.card h2{margin:0 0 8px;font-size:15px}
+.now{background:linear-gradient(135deg,#3b6cf6,#6a8cff);color:#fff}
+.now .big{font-size:22px;font-weight:700;margin:2px 0}
+.now .small{opacity:.9;font-size:13px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.pn{width:28px;height:28px;border-radius:50%;background:var(--pri2);color:var(--pri);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
+.row.cur .pn{background:var(--pri);color:#fff}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:15px}
+.row .t span{font-size:12px;color:var(--sub)}
+.row .tm{font-size:12px;color:var(--sub);text-align:right}
+.empty{color:var(--sub);font-size:13px;padding:6px 0}
+.days{display:flex;gap:6px;margin:6px 0}
+.days button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 0;font-size:14px;font-family:inherit;color:var(--ink)}
+.days button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.days button.today{font-weight:700;border-color:var(--pri)}
+table{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed}
+th{font-size:12px;color:var(--sub);font-weight:600;padding:4px 0}
+td.c{background:var(--pri2);border-radius:8px;height:54px;text-align:center;font-size:11px;padding:2px;vertical-align:middle;word-break:break-all;}
+td.c.empty2{background:#f0f1f5;color:#b4b9c8}
+td.c.cur{outline:2px solid var(--pri)}
+td.p{font-size:12px;font-weight:700;color:var(--sub);text-align:center;width:30px}
+.hint{font-size:12px;color:var(--sub);margin:4px 2px}
+.bus-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.bus-item:first-child{border-top:0}
+.bus-time{font-size:20px;font-weight:700;width:64px}
+.bus-info{flex:1;font-size:13px;color:var(--sub)}
+.badge{font-size:12px;padding:3px 8px;border-radius:99px;background:var(--pri2);color:var(--pri);font-weight:700}
+.badge.soon{background:#fff0e6;color:var(--warn)}
+.badge.gone{background:#eee;color:#999}
+.next{font-size:32px;font-weight:800;margin:4px 0}
+.btn{border:0;background:var(--pri);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;font-family:inherit;font-weight:600}
+.btn.sec{background:var(--pri2);color:var(--pri)}
+.btn.del{background:#fdeaea;color:#c92a2a}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.seg button{flex:1 1 40%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 4px;font-size:13px;font-family:inherit}
+.seg button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+input,textarea,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:16px;font-family:inherit;margin:4px 0 10px;background:#fff;color:var(--ink)}
+label{font-size:12px;color:var(--sub);font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(20,25,40,.45);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.modal.on{display:flex}
+.sheet{background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+.sheet h3{margin:0 0 10px}
+.btns{display:flex;gap:8px}
+.btns .btn{flex:1}
+.pt{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-size:14px}
+.pt input{margin:0;padding:8px}
+.pt span{width:54px;flex:none}
+.todo{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.todo:first-of-type{border-top:0}
+.todo input[type=checkbox]{width:20px;height:20px;margin:0;flex:none}
+.todo.done span{text-decoration:line-through;color:var(--sub)}
+.todo .x{margin-left:auto;border:0;background:none;color:var(--sub);font-size:18px}
+.add{display:flex;gap:6px;margin-top:8px}
+.add input{margin:0}
+.add .btn{flex:none}
+.bw{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:16px;margin:10px 0;display:flex;gap:14px;cursor:pointer;user-select:none;box-shadow:0 1px 4px rgba(20,30,60,.08)}
+.bw .l{flex:1.1;min-width:0}.bw .r{flex:1;min-width:0;border-left:1px solid var(--line);padding-left:14px}
+.bw .hd{display:flex;gap:8px;align-items:stretch}
+.bw .bar{width:4px;border-radius:2px;background:var(--pri);flex:none}
+.bw .fr{font-size:12px;color:var(--sub)}
+.bw .to{font-size:20px;font-weight:700;line-height:1.2}
+.bw .tm{font-size:17px;font-weight:700;margin-top:12px}
+.bw .tm small{font-size:13px;font-weight:500;color:var(--sub)}
+.bw .cd{font-size:44px;font-weight:800;line-height:1.05;margin-top:8px;font-variant-numeric:tabular-nums;letter-spacing:-1px;color:var(--pri)}
+.bw .cd.mid{font-size:30px;letter-spacing:0}
+.bw .cd.sm{font-size:22px;letter-spacing:0;color:var(--ink)}
+.bw .rt{font-size:12px;color:var(--sub);padding-bottom:6px;border-bottom:1px solid var(--line)}
+.bw .nx{padding:8px 0;border-bottom:1px solid var(--line)}
+.bw .nx:last-of-type{border-bottom:0}
+.bw .nx b{font-size:17px;color:var(--ink)}
+.bw .nx small{font-size:12px;color:var(--sub);margin-left:4px}
+.bw .bg{display:inline-block;font-size:11px;font-weight:700;border:1.5px solid;border-radius:6px;padding:1px 6px;margin:4px 4px 0 0}
+.bw .bg.o{color:var(--warn);border-color:var(--warn)}
+.curh .bands{background:var(--pri2);color:var(--pri);border-radius:10px;padding:8px 10px;font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.6}
+.tr{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);align-items:flex-start}
+.tr:first-of-type{border-top:0}
+.th{width:30px;flex:none;text-align:center;font-weight:800;font-size:17px;color:var(--pri);line-height:1.5}
+.tmn{display:flex;flex-wrap:wrap;gap:4px 12px;flex:1}
+.mn{font-size:17px;font-weight:600;min-width:26px;font-variant-numeric:tabular-nums;line-height:1.5}
+.mn sup{font-size:10px;color:var(--warn);margin-left:1px}
+.mn.gone{color:#b4b9c8;font-weight:500}
+.mn.skip{color:#b4b9c8;text-decoration:line-through;font-weight:500}
+.mn.next{background:var(--pri);color:#fff;border-radius:8px;padding:0 8px}
+.mn.next sup{color:#ffd8a8}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">スクールライフ</h1>
+  <div class="date" id="today"></div>
+</header>
+<main>
+
+<!-- ホーム -->
+<section class="tab on" id="tab-home">
+  <div class="card now" id="nowCard"></div>
+  <div class="card"><h2>🚌 次のバス</h2><div id="homeBus"></div></div>
+  <div class="card"><h2>📚 今日の時間割</h2><div id="homeTT"></div></div>
+  <div class="card">
+    <h2>✅ 持ち物・宿題メモ</h2>
+    <div id="todos"></div>
+    <div class="add"><input id="todoIn" placeholder="例: 数学のワーク p.20" maxlength="60"><button class="btn" onclick="addTodo()">追加</button></div>
+  </div>
+</section>
+
+<!-- 時間割 -->
+<section class="tab" id="tab-tt">
+  <button class="btn sec" id="ttEditToggle" onclick="toggleTTEdit()" style="width:100%;margin:6px 0">✏️ 時間割を編集する</button>
+  <div class="card" id="ttCard">
+    <h2 id="ttTitle">時間割</h2>
+    <table id="ttTable"></table>
+    <div class="hint" id="ttHint">月〜土の時間割です。編集するには上のボタンを押してください。</div>
+  </div>
+  <div id="ttEditExtra" style="display:none">
+    <div class="card">
+      <h2>まとめて変更</h2>
+      <div class="hint">選択科目などで人によって時間割が違うときは、いったん空にして自分の分を入れてください。</div>
+      <div class="btns" style="flex-direction:column">
+        <button class="btn del" id="rstBlank" onclick="resetTT('blank')">時間割をすべて空にする</button>
+        <button class="btn sec" id="rstSample" onclick="resetTT('sample')">最初の時間割(3年4組)に戻す</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- バス -->
+<section class="tab" id="tab-bus">
+  <div class="seg" id="grpSeg"></div>
+  <div id="busWidgets"></div>
+  <div id="busNow" style="display:none"></div>
+  <div class="seg" id="routeSeg"></div>
+  <div class="seg" id="typeSeg">
+    <button data-t="weekday" onclick="setType('weekday')">平日</button>
+    <button data-t="sat" onclick="setType('sat')">土曜</button>
+    <button data-t="hol" onclick="setType('hol')">日祝</button>
+  </div>
+  <div class="card"><h2 id="busListTitle">時刻表</h2><div id="busList"></div></div>
+  <button class="btn sec" id="editToggle" onclick="toggleEdit()" style="width:100%;margin:6px 0">✏️ 時刻表を編集する</button>
+  <div class="card" id="editCard" style="display:none;border:2px solid var(--warn)">
+    <h2>✏️ 時刻表を編集中</h2>
+    <div class="hint" id="editTarget" style="font-weight:700;color:var(--ink)"></div>
+    <div class="hint">学校のバス時刻表を見ながら入力してください。</div>
+    <label>路線名(例: 駅→学校)</label>
+    <input id="routeName">
+    <label>この曜日の時刻(カンマ・スペース・改行区切り 例: 7:30, 7:45, 8:05。◎や△は時刻の後ろに付けられます 例: 15:15◎)</label>
+    <textarea id="routeTimes" rows="4"></textarea>
+    <label>メモ(乗り場など)</label>
+    <input id="routeNote" placeholder="例: 2番のりば">
+    <div class="btns"><button class="btn" onclick="saveRoute()">保存して閉じる</button><button class="btn sec" onclick="newRoute()">路線を追加</button><button class="btn del" id="delBtn" onclick="delRoute()">路線を削除</button></div>
+  </div>
+  <div class="card">
+    <h2>注意事項(2026年度時刻表より)</h2>
+    <div class="hint" style="line-height:1.7">
+      ◎ 大学授業日・試験日のみ運行。運行日: 4/10〜7/31、9/21〜12/23、1/8〜2/4(授業休講日 11/13・11/24・11/25・1/15・1/16 と、秋季臨時休業 10/31〜11/5は運行なし)。アプリが今日の日付で自動判定します<br>
+      △ 立教新座中学校・高等学校の定期試験等の期間は運休(日程はバス停掲示・HPで確認)<br>
+      運休日(新座キャンパス便): 8/11〜8/20、11/3・11/4(IVY Festa)、12/24〜1/7(1/7は特別ダイヤ)<br>
+      8/1〜9/3は夏季特別時刻表で運行<br>
+      大学祝日授業日(4/29、5/5、5/6、7/20、9/21〜9/23、10/12、11/23)は通常の平日時刻表<br>
+      ※平日の祝日は自動判定しないので、必要なら「平日/土曜/日祝」を切り替えて見てください<br>
+      交通事情・行事でダイヤが乱れる・変更になる場合があります。混雑で乗り切れないことがあります。新座駅では路線バスの発着で発車が遅れることがあります。
+    </div>
+  </div>
+  </div>
+</section>
+
+</main>
+
+<nav>
+  <button class="on" data-tab="home"><span class="ic">🏠</span>ホーム</button>
+  <button data-tab="tt"><span class="ic">📅</span>時間割</button>
+  <button data-tab="bus"><span class="ic">🚌</span>バス</button>
+</nav>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="sheet">
+    <h3 id="mTitle"></h3>
+    <label>科目</label><input id="mSubj" maxlength="12" placeholder="例: 数学">
+    <label>教室・先生</label><input id="mRoom" maxlength="12" placeholder="例: 2-3教室">
+    <label>メモ(持ち物など)</label><input id="mMemo" maxlength="40" placeholder="例: 電卓">
+    <div class="btns"><button class="btn" onclick="saveCell()">保存</button><button class="btn del" onclick="clearCell()">クリア</button><button class="btn sec" onclick="closeModal()">閉じる</button></div>
+  </div>
+</div>
+
+<script>
+const DAYS=['日','月','火','水','木','金','土'];
+const KEY='schoolapp.v5';
+let S;
+let viewDay=null, editCell=null, busType=null, curRoute=0;
+
+const rng=(a,b)=>{const o=[];for(let m=a;m<=b;m+=5)o.push(fmt(m));return o};
+const hrs=o=>Object.entries(o).flatMap(([h,v])=>v.split(' ').filter(Boolean).map(m=>h+':'+m));
+function defRoutes(){
+  return [
+    {name:'新座駅南口 → 立教新座',note:'新座駅南口発 立教新座キャンパス行き(2026年度版)',
+     bands:{weekday:[{s:'7:40',e:'8:40',txt:'約5分間隔で運行'}],sat:[{s:'7:40',e:'8:40',txt:'約5分間隔で運行'}]},
+     times:{
+      weekday:hrs({7:'30 40',8:'40 45',9:'00 15 45 55',10:'05 15 25 30 35',11:'35 50',12:'45 50',13:'05 10 40',14:'40',15:'05 15◎ 30 40 45 50△ 55',16:'20 50',17:'10 15 20 30 40',18:'05 10 30 40 45'}),
+      sat:hrs({7:'30 40',8:'40 45 50',9:'30 55',10:'25 35 55',11:'25 40 55',12:'45 55',13:'00 05 15 20 25',14:'20 50',15:'20 35◎ 50',16:'20 30 50',17:'20'}),
+      hol:hrs({12:'25',13:'45'})}},
+    {name:'立教新座 → 新座駅南口',note:'立教新座キャンパス発 新座駅南口行き。2027/2/5〜3/31は22:00発が運休',
+     bands:{weekday:[{s:'7:50',e:'8:50',txt:'おおよそ10〜15分間隔で運行'}],sat:[{s:'7:50',e:'8:40',txt:'おおよそ10〜15分間隔で運行'}]},
+     times:{
+      weekday:hrs({8:'50',9:'05 35 45 55',10:'05 15 20 25',11:'25 40',12:'35 40 55',13:'00 30',14:'30 55',15:'05◎ 20 25◎ 30 35 40△ 45',16:'10 40',17:'00 05 10 20 30 45◎ 55',18:'00 20 30 35',19:'00 05◎ 30 45',20:'45',21:'15',22:'00'}),
+      sat:hrs({8:'40',9:'20 45',10:'15 25 45',11:'15 30 45',12:'35 45 50 55',13:'05 10 15',14:'10 40',15:'10 25◎ 40',16:'10 20 40',17:'10 30 40',18:'10 30',19:'00'}),
+      hol:hrs({12:'15',13:'35'})}},
+    {name:'志木駅南口 → 立教新座',note:'志木駅南口発 立教新座キャンパス行き(2026年度版)',times:{
+      weekday:hrs({10:'10 20◎ 25 30 35◎',11:'50',12:'40 45◎ 50',13:'05 25',14:'30 55',15:'30 50 55',16:'05 45',17:'05 15 25 55',18:'30'}),
+      sat:hrs({10:'10◎ 25◎',12:'35◎ 40 50',13:'10 15◎ 30',15:'05 35',16:'05 35 45',17:'05'}),
+      hol:hrs({12:'00'})}},
+    {name:'立教新座 → 志木駅南口',note:'立教新座キャンパス発 志木駅南口行き。2027/2/5〜3/31は22:00発が運休',times:{
+      weekday:hrs({10:'40',11:'45',12:'35 40◎ 45',13:'00 20',14:'25 50',15:'05◎ 20 25 45 50',16:'00 40',17:'00 05◎ 10 20 25◎ 30 50',18:'25 40',19:'00 05◎ 20 55',20:'45',21:'15',22:'00'}),
+      sat:hrs({12:'30◎ 35 45',13:'05 10◎ 25',15:'00 30 45◎',16:'00 30 40',17:'00 30',18:'00',19:'00'}),
+      hol:hrs({13:'55'})}}
+  ];
+}
+function def(){
+  const times=[['8:40','9:30'],['9:40','10:30'],['10:45','11:35'],['11:45','12:35'],['13:20','14:10'],['14:20','15:10']];
+  const g={
+    1:[['C選択'],['C選択'],['論理表現'],['国語A選'],['英コミュⅢ'],[]],
+    2:[['C選択'],['C選択'],['体育'],['体育'],['論理表現'],['理社B選']],
+    3:[['C選択'],['C選択'],['国語A選'],['理社B選'],['英コミュⅢ'],['文学国語','伊藤']],
+    4:[['C選択'],['C選択'],['HR','香取'],['文学国語','伊藤'],['数学A選'],['英コミュⅢ']],
+    5:[['C選択'],['C選択'],['理社B選'],['文学国語','伊藤'],['体育'],['体育']],
+    6:[['国語A選'],['英コミュⅢ'],['理社B選'],['数学A選'],[],[]]
+  };
+  const tt={};
+  Object.entries(g).forEach(([d,ps])=>ps.forEach((c,i)=>{if(c[0])tt[d+'-'+i]={subj:c[0],room:c[1]||'',memo:''}}));
+  return {periods:times.map(t=>({s:t[0],e:t[1]})),tt,todos:[],routes:defRoutes()};
+}
+function load(){
+  try{
+    let r=localStorage.getItem(KEY);
+    if(r){const o=JSON.parse(r);if(o&&o.periods&&o.routes)return o;}
+    r=localStorage.getItem('schoolapp.v4');
+    if(r){const o=JSON.parse(r);if(o&&o.periods){o.routes=defRoutes();return o;}}
+    r=localStorage.getItem('schoolapp.v3');
+    if(r){const o=JSON.parse(r);if(o&&o.periods){o.routes=defRoutes();return o;}}
+  }catch(e){}
+  return def();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toMin=t=>{const m=/^(\d{1,2}):(\d{2})[◎△]?$/.exec(t);return m?(+m[1])*60+(+m[2]):null};
+const mk=t=>{const m=/[◎△]$/.exec(t);return m?m[0]:''};
+const parseT=a=>(a||[]).map(t=>({m:toMin(t),k:mk(t)})).filter(x=>x.m!=null).sort((a,b)=>a.m-b.m);
+const fmt=m=>Math.floor(m/60)+':'+String(m%60).padStart(2,'0');
+const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60};
+function dayType(d){return d===0?'hol':d===6?'sat':'weekday'}
+
+/* ---- tabs ---- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab-'+b.dataset.tab));
+  window.scrollTo(0,0); renderAll();
+});
+
+/* ---- timetable ---- */
+function cell(d,p){return S.tt[d+'-'+p]||null}
+function currentPeriod(){
+  const n=nowMin();
+  for(let i=0;i<S.periods.length;i++){const s=toMin(S.periods[i].s),e=toMin(S.periods[i].e);if(s!=null&&e!=null&&n>=s&&n<e)return i;}
+  return -1;
+}
+function toggleTTEdit(force){
+  ttEditing=typeof force==='boolean'?force:!ttEditing;
+  const b=document.getElementById('ttEditToggle');
+  b.textContent=ttEditing?'✓ 編集を終わる':'✏️ 時間割を編集する';
+  b.className=ttEditing?'btn':'btn sec';
+  document.getElementById('ttEditExtra').style.display=ttEditing?'block':'none';
+  document.getElementById('ttCard').style.border=ttEditing?'2px solid var(--warn)':'none';
+  document.getElementById('ttTitle').textContent=ttEditing?'✏️ 編集中(コマをタップ)':'時間割';
+  document.getElementById('ttHint').textContent=ttEditing?'コマをタップして科目・教室(先生)・メモを入力します。変更はその場で保存されます。':'月〜土の時間割です。編集するには上のボタンを押してください。';
+  renderTT();
+}
+function resetTT(kind){
+  const id=kind==='blank'?'rstBlank':'rstSample',btn=document.getElementById(id),label=kind==='blank'?'時間割をすべて空にする':'最初の時間割(3年4組)に戻す';
+  const t=Date.now();
+  if(!(rstArm[kind]&&t-rstArm[kind]<4000)){rstArm[kind]=t;btn.textContent='もう一度押すと実行';setTimeout(()=>{btn.textContent=label},4000);return}
+  rstArm[kind]=0;btn.textContent=label;
+  const d=def();
+  if(kind==='blank'){S.tt={}}else{S.tt=d.tt;S.periods=d.periods}
+  save();renderAll();alert_(kind==='blank'?'時間割を空にしました':'最初の時間割に戻しました');
+}
+function renderTT(){
+  const today=new Date().getDay();
+  let h='<tr><th></th>'+[1,2,3,4,5,6].map(d=>`<th${d===today?' style="color:var(--pri)"':''}>${DAYS[d]}</th>`).join('')+'</tr>';
+  const cp=currentPeriod();
+  S.periods.forEach((p,i)=>{
+    h+=`<tr><td class="p">${i+1}<br><span style="font-weight:400;font-size:9px">${esc(pad(p.s))}</span></td>`;
+    for(let d=1;d<=6;d++){
+      const c=cell(d,i);
+      const cur=(d===today&&i===cp)?' cur':'';
+      const oc=ttEditing?` onclick="openCell(${d},${i})"`:'';
+      h+=c&&c.subj?`<td class="c${cur}"${oc}><b>${esc(c.subj)}</b>${c.room?'<br><small>'+esc(c.room)+'</small>':''}</td>`
+                  :`<td class="c empty2${cur}"${oc}>${ttEditing?'＋':''}</td>`;
+    }
+    h+='</tr>';
+  });
+  document.getElementById('ttTable').innerHTML=h;
+}
+function pad(t){const m=toMin(t);return m==null?'':String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+function openCell(d,p){
+  editCell={d,p};const c=cell(d,p)||{};
+  document.getElementById('mTitle').textContent=`${DAYS[d]}曜 ${p+1}限`;
+  mSubj.value=c.subj||'';mRoom.value=c.room||'';mMemo.value=c.memo||'';
+  modal.classList.add('on');
+}
+function closeModal(){modal.classList.remove('on')}
+function saveCell(){
+  const v={subj:mSubj.value.trim(),room:mRoom.value.trim(),memo:mMemo.value.trim()};
+  const k=editCell.d+'-'+editCell.p;
+  if(v.subj||v.room||v.memo)S.tt[k]=v;else delete S.tt[k];
+  save();closeModal();renderAll();
+}
+function clearCell(){delete S.tt[editCell.d+'-'+editCell.p];save();closeModal();renderAll()}
+
+/* ---- home ---- */
+function dayListHTML(d,showCur){
+  let h='',any=false;const cp=showCur?currentPeriod():-1;
+  S.periods.forEach((p,i)=>{
+    const c=cell(d,i);if(!c||!c.subj)return;any=true;
+    h+=`<div class="row${i===cp?' cur':''}"><div class="pn">${i+1}</div><div class="t"><b>${esc(c.subj)}</b><span>${[c.room,c.memo?'持ち物: '+c.memo:''].filter(Boolean).map(esc).join(' / ')||'&nbsp;'}</span></div><div class="tm">${esc(pad(p.s))}<br>${esc(pad(p.e))}</div></div>`;
+  });
+  return any?h:'<div class="empty">授業が登録されていません</div>';
+}
+function renderHome(){
+  const now=new Date(),d=now.getDay();
+  document.getElementById('today').textContent=`${now.getMonth()+1}月${now.getDate()}日(${DAYS[d]})`;
+  // now card
+  const n=nowMin(),cp=currentPeriod();let nc='';
+  if(d===0){nc='<div class="small">今日は</div><div class="big">お休みの日 🎉</div><div class="small">バスは日祝ダイヤで表示します</div>';}
+  else if(cp>=0){
+    const c=cell(d,cp),e=toMin(S.periods[cp].e);
+    nc=`<div class="small">いま ${cp+1}限</div><div class="big">${c&&c.subj?esc(c.subj):'(未登録)'}</div><div class="small">${c&&c.room?esc(c.room)+' ・ ':''}あと${remTxt(e-n)}</div>`;
+  } else {
+    let nx=-1;for(let i=0;i<S.periods.length;i++){const c0=cell(d,i);if(c0&&c0.subj&&toMin(S.periods[i].s)>n){nx=i;break;}}
+    if(nx>=0){const c=cell(d,nx);nc=`<div class="small">次は ${nx+1}限(${esc(pad(S.periods[nx].s))}〜)</div><div class="big">${c&&c.subj?esc(c.subj):'(未登録)'}</div><div class="small">あと${remTxt(toMin(S.periods[nx].s)-n)}${c&&c.memo?' ・ 持ち物: '+esc(c.memo):''}</div>`;}
+    else nc='<div class="small">今日の授業は</div><div class="big">おわり 👋</div><div class="small">おつかれさま!</div>';
+  }
+  document.getElementById('nowCard').innerHTML=nc;
+  document.getElementById('homeTT').innerHTML=d===0?'<div class="empty">日曜は授業なし</div>':dayListHTML(d,true);
+  // bus
+  document.getElementById('homeBus').innerHTML=busSummary(true);
+  // todos
+  document.getElementById('todos').innerHTML=S.todos.length?S.todos.map((t,i)=>`<div class="todo${t.done?' done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span>${esc(t.text)}</span><button class="x" onclick="delTodo(${i})">×</button></div>`).join(''):'<div class="empty">まだありません</div>';
+}
+function addTodo(){const v=todoIn.value.trim();if(!v)return;S.todos.push({text:v,done:false});todoIn.value='';save();renderHome()}
+function toggleTodo(i){S.todos[i].done=!S.todos[i].done;save();renderHome()}
+function delTodo(i){S.todos.splice(i,1);save();renderHome()}
+document.getElementById('todoIn').addEventListener('keydown',e=>{if(e.key==='Enter')addTodo()});
+
+/* ---- bus ---- */
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const inR=(x,a,b)=>x>=a&&x<=b;
+function busStatus(d){
+  const x=ymd(d);let off='';const notes=[];
+  if(inR(x,'2026-08-11','2026-08-20'))off='夏季一斉休暇期間';
+  else if(x==='2026-11-03'||x==='2026-11-04')off='IVY Festa開催日';
+  else if(inR(x,'2026-12-24','2027-01-06'))off='冬季休業期間';
+  if(x==='2027-01-07')notes.push('1/7は中高の認定試験のため特別ダイヤです。公式HPで確認してください');
+  if(inR(x,'2026-08-01','2026-09-03'))notes.push('8/1〜9/3は夏季特別時刻表で運行します(この表と異なります)');
+  if(inR(x,'2027-02-05','2027-03-31'))notes.push('22:00発(立教新座発)は運休期間です');
+  const run=inR(x,'2026-04-10','2026-07-31')||inR(x,'2026-09-21','2026-12-23')||inR(x,'2027-01-08','2027-02-04');
+  const kyuko=['2026-05-01','2026-05-02','2026-11-13','2026-11-24','2026-11-25','2027-01-15','2027-01-16'];
+  const mark=run&&!kyuko.includes(x)&&!inR(x,'2026-10-31','2026-11-05');
+  return {off,notes,mark};
+}
+function nextBuses(route,type,limit){
+  const n=nowMin(),st=busStatus(new Date());
+  if(st.off)return [];
+  return parseT(route.times[type]).filter(x=>x.m>n&&(x.k!=='◎'||st.mark)).slice(0,limit);
+}
+function activeBand(r,type){
+  const n=nowMin();if(busStatus(new Date()).off)return null;
+  return ((r.bands||{})[type]||[]).find(b=>n>=toMin(b.s)&&n<toMin(b.e))||null;
+}
+const remTxt=m=>{const t=Math.ceil(m);if(t<60)return t+'分';const h=Math.floor(t/60),mm=t%60;return h+'時間'+(mm?mm+'分':'')};
+const dk=k=>k==='◎'||k==='△'?k:'';
+function busSummary(){
+  const type=dayType(new Date().getDay()),st=busStatus(new Date());
+  if(!S.routes.length)return '<div class="empty">路線がありません。バスタブで追加してください</div>';
+  if(st.off)return `<div class="empty">今日はバス運休日です(${st.off})</div>`;
+  const n=nowMin();
+  let h=S.routes.map(r=>{
+    const band=activeBand(r,type),nb=nextBuses(r,type,5);
+    const list5=a=>a.map(x=>fmt(x.m)+dk(x.k)).join(' ・ ');
+    let txt;
+    if(band)txt=`<span class="badge soon">運行中</span> <span style="font-size:12px">${esc(band.txt)}(〜${esc(band.e)})</span>`+(nb.length?`<div class="hint" style="margin:3px 0 0">この後: ${list5(nb)}</div>`:'');
+    else if(nb.length)txt=`<b style="font-size:18px">${fmt(nb[0].m)}${dk(nb[0].k)}</b> <span class="badge${nb[0].m-n<=10?' soon':''}">あと${remTxt(nb[0].m-n)}</span>`+(nb.length>1?`<div class="hint" style="margin:3px 0 0">この後: ${list5(nb.slice(1))}</div>`:'');
+    else txt='<span class="empty">本日の便は終了</span>';
+    return `<div class="bus-item" style="align-items:flex-start"><div class="bus-info" style="flex:none;width:96px;color:var(--ink);font-weight:600">${esc(r.name)}</div><div style="flex:1">${txt}</div></div>`;
+  }).join('');
+  if(st.notes.length)h+=`<div class="hint">${st.notes.map(esc).join('<br>')}</div>`;
+  return h;
+}
+function setType(t){busType=t;renderBus()}
+function setRoute(i){curRoute=i;renderBus();renderWidgets()}
+function renderBus(){
+  if(curRoute>=S.routes.length)curRoute=Math.max(0,S.routes.length-1);
+  if(S.routes[curRoute]&&grpOf(S.routes[curRoute])!==curGroup){const k=S.routes.findIndex(r=>grpOf(r)===curGroup);if(k>=0)curRoute=k;}
+  document.getElementById('grpSeg').innerHTML=[['niiza','🚉 新座駅'],['shiki','🚉 志木駅']].map(g=>`<button class="${g[0]===curGroup?'on':''}" style="flex:1 1 40%" onclick="setGroup('${g[0]}')">${g[1]}</button>`).join('');
+  const today=dayType(new Date().getDay());
+  if(!busType)busType=today;
+  document.querySelectorAll('#typeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.t===busType));
+  document.getElementById('routeSeg').innerHTML=S.routes.map((r,i)=>grpOf(r)===curGroup?`<button class="${i===curRoute?'on':''}" onclick="setRoute(${i})">${esc(r.name)}</button>`:'').join('');
+  const r=S.routes[curRoute];
+  const n=nowMin();
+  if(!r){document.getElementById('busNow').innerHTML='<div class="big">路線がありません</div>';document.getElementById('busList').innerHTML='';routeName.value='';routeTimes.value='';routeNote.value='';return;}
+  // now card (today's type)
+  const st=busStatus(new Date());
+  const nb=nextBuses(r,today,5),band=activeBand(r,today);
+  const after=a=>a.length?`<div class="small" style="margin-top:6px">この後: ${a.map(x=>fmt(x.m)+dk(x.k)).join(' ・ ')}</div>`:'';
+  const sub=r.note?esc(r.note):'';
+  let card;
+  if(st.off)card=`<div class="small">${esc(r.name)}</div><div class="big">今日は運休日</div><div class="small">${esc(st.off)}</div>`;
+  else if(band)card=`<div class="small">${esc(r.name)}</div><div class="big">運行中(〜${esc(band.e)})</div><div class="small">${esc(band.txt)}</div>${after(nb)}`;
+  else if(nb.length)card=`<div class="small">${esc(r.name)} ・ 次のバス</div><div class="next">${fmt(nb[0].m)}${dk(nb[0].k)}</div><div class="small">あと${remTxt(nb[0].m-n)}${sub?' ・ '+sub:''}</div>${after(nb.slice(1))}`;
+  else card=`<div class="small">${esc(r.name)}</div><div class="big">本日の便は終了</div><div class="small">${sub}</div>`;
+  if(st.notes.length)card+=`<div class="small" style="margin-top:6px">⚠ ${st.notes.map(esc).join(' / ')}</div>`;
+  document.getElementById('busNow').innerHTML=card;
+  const list=parseT(r.times[busType]);
+  const isToday=busType===today;
+  document.getElementById('busListTitle').textContent=`時刻表(${{weekday:'平日',sat:'土曜',hol:'日祝'}[busType]})`;
+  const bandsHTML=((r.bands||{})[busType]||[]).map(b=>`<div>⏱ ${esc(b.s)}頃〜${esc(b.e)}は${esc(b.txt)}</div>`).join('');
+  let firstNext=isToday&&!st.off?list.findIndex(x=>x.m>n&&(x.k!=='◎'||st.mark)):-1;
+  const byH={};
+  list.forEach((x,i)=>{const h=Math.floor(x.m/60);(byH[h]=byH[h]||[]).push([x,i])});
+  const grid=Object.keys(byH).map(Number).sort((a,b)=>a-b).map(h=>`<div class="tr"><div class="th">${h}</div><div class="tmn">${byH[h].map(([x,i])=>{
+    const skipped=isToday&&(st.off||(x.k==='◎'&&!st.mark));
+    let c='mn';if(isToday){if(skipped)c+=' skip';else if(i===firstNext)c+=' next';else if(x.m<=n)c+=' gone';}
+    return `<span class="${c}">${String(x.m%60).padStart(2,'0')}${dk(x.k)?'<sup>'+dk(x.k)+'</sup>':''}</span>`}).join('')}</div></div>`).join('');
+  document.getElementById('busList').innerHTML=list.length||bandsHTML?
+    (bandsHTML?`<div class="bands">${bandsHTML}</div>`:'')+grid+'<div class="hint" style="margin-top:8px">◎=大学授業日のみ運行 / △=中高の試験期間は運休 / 青=次のバス</div>':'<div class="empty">時刻が登録されていません。下で入力してください</div>';
+  // editor
+  document.getElementById('editTarget').textContent=`対象: ${r.name}(${{weekday:'平日',sat:'土曜',hol:'日祝'}[busType]}の時刻)`;
+  routeName.value=r.name;routeNote.value=r.note||'';
+  routeTimes.value=(r.times[busType]||[]).join(', ');
+}
+let editing=false;
+function toggleEdit(force){
+  editing=typeof force==='boolean'?force:!editing;
+  document.getElementById('editCard').style.display=editing?'block':'none';
+  const b=document.getElementById('editToggle');
+  b.textContent=editing?'✕ 編集をやめる(保存しない)':'✏️ 時刻表を編集する';
+  b.className=editing?'btn del':'btn sec';
+  if(editing){renderBus();document.getElementById('editCard').scrollIntoView({behavior:'smooth',block:'start'})}
+}
+function saveRoute(){
+  let r=S.routes[curRoute];
+  if(!r){r={name:'',grp:curGroup,note:'',times:{weekday:[],sat:[],hol:[]}};S.routes.push(r);curRoute=S.routes.length-1;}
+  r.name=routeName.value.trim()||'路線'+(curRoute+1);
+  r.note=routeNote.value.trim();
+  const arr=routeTimes.value.split(/[\s,、，]+/).map(s=>s.replace('：',':').trim()).filter(Boolean);
+  const bad=arr.filter(t=>toMin(t)==null);
+  if(bad.length){alert_('時刻の形式が正しくありません: '+bad.join(', ')+'\n例: 7:30, 7:45');return;}
+  r.times[busType]=arr.map(t=>fmt(toMin(t))+mk(t));
+  save();toggleEdit(false);renderAll();alert_('保存しました');
+}
+function newRoute(){S.routes.push({name:'新しい路線',grp:curGroup,note:'',times:{weekday:[],sat:[],hol:[]}});curRoute=S.routes.length-1;save();renderAll();toggleEdit(true)}
+function delRoute(){
+  if(!S.routes.length)return;
+  const btn=document.getElementById('delBtn');
+  if(!confirmTwice()){btn.textContent='もう一度押すと削除';setTimeout(()=>{btn.textContent='路線を削除'},4000);return}
+  btn.textContent='路線を削除';
+  S.routes.splice(curRoute,1);curRoute=Math.max(0,S.routes.findIndex(r=>grpOf(r)===curGroup));save();toggleEdit(false);renderAll();alert_('路線を削除しました');
+}
+let delArmed=0;
+function confirmTwice(){ // confirm()が使えないため2回タップ方式
+  const t=Date.now();if(t-delArmed<4000){delArmed=0;return true}
+  delArmed=t;alert_('もう一度「路線を削除」を押すと削除します');return false;
+}
+function alert_(msg){
+  let el=document.getElementById('toast');
+  if(!el){el=document.createElement('div');el.id='toast';el.style.cssText='position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom));background:#1d2433;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;z-index:20;white-space:pre-line;display:none';document.body.appendChild(el)}
+  el.textContent=msg;el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3500);
+}
+
+let ttEditing=false,rstArm={};
+let wTargets=[];
+const grpOf=r=>r.grp||(r.name.includes('志木')?'shiki':'niiza');
+let curGroup='niiza';
+function setGroup(g){curGroup=g;curRoute=S.routes.findIndex(r=>grpOf(r)===g);if(curRoute<0)curRoute=0;renderBus();renderWidgets()}
+function badges(x){let h='';if(x.k==='◎')h+='<span class="bg o">◎授業日</span>';if(x.k==='△')h+='<span class="bg o">△試験期間休</span>';return h}
+function widgetHTML(r,idx){
+  const type=dayType(new Date().getDay()),st=busStatus(new Date());
+  const parts=r.name.split(/\s*→\s*/);const from=parts.length>1?parts[0]+'発':'',to=parts.length>1?parts[1]+'行き':r.name;
+  const nb=nextBuses(r,type,3),band=activeBand(r,type);
+  let left,right='';
+  wTargets[idx]=null;
+  const head=`<div class="hd"><div class="bar"></div><div><div class="fr">${esc(from)}</div><div class="to">${esc(to)}</div></div></div>`;
+  if(st.off){left=head+`<div class="cd sm" style="margin-top:18px">運休日</div><div class="fr" style="margin-top:6px">${esc(st.off)}</div>`}
+  else if(!nb.length&&!band){left=head+`<div class="cd sm" style="margin-top:18px">本日終了</div>`}
+  else{
+    const cur=nb[0];
+    if(band){left=head+`<div class="tm">運行中 <small>〜${esc(band.e)}</small></div><div class="cd sm">${esc(band.txt)}</div>`+(cur?`<div class="fr" style="margin-top:8px">次の時刻表便 ${fmt(cur.m)}${dk(cur.k)}</div>`:'');}
+    else{wTargets[idx]=cur.m*60;left=head+`<div class="tm">${fmt(cur.m)} <small>${esc(to)}</small></div><div>${badges(cur)}</div><div class="cd" id="wcd${idx}">--:--</div>`;}
+    const rest=band?nb.slice(0,2):nb.slice(1,3);
+    right=`<div class="rt">次のダイヤ</div>`+(rest.length?rest.map(x=>`<div class="nx"><b>${fmt(x.m)}</b><small>${esc(to)}</small><div>${badges(x)}</div></div>`).join(''):'<div class="nx"><small>ありません</small></div>');
+  }
+  return `<div class="bw" onclick="setRoute(${idx})"><div class="l">${left}</div><div class="r">${right}</div></div>`;
+}
+function renderWidgets(){
+  const el=document.getElementById('busWidgets');
+  wTargets=[];
+  const idxs=S.routes.map((r,i)=>i).filter(i=>grpOf(S.routes[i])===curGroup);
+  el.innerHTML=idxs.length?idxs.map(i=>widgetHTML(S.routes[i],i)).join(''):'<div class="card empty">この駅の路線がありません</div>';
+  tickW();
+}
+function tickW(){
+  const d=new Date(),now=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
+  for(let i=0;i<wTargets.length;i++){
+    const t0=wTargets[i];if(t0==null)continue;
+    const rem=t0-now;
+    if(rem<=0){renderWidgets();return}
+    const h=Math.floor(rem/3600),m=Math.floor(rem%3600/60),sec=rem%60;
+    const t=h>0?`${h}時間${m}分`:`${m}:${String(sec).padStart(2,'0')}`;
+    const c=document.getElementById('wcd'+i);if(c){c.textContent=t;c.className='cd'+(h>0?' mid':'');}
+  }
+}
+function renderAll(){renderHome();renderTT();renderBus();renderWidgets()}
+S=load();
+renderAll();
+setInterval(tickW,1000);
+setInterval(()=>{ if(!modal.classList.contains('on')&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)) renderAll(); },30000);
+try{if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+</script>
+</body>
+</html>
